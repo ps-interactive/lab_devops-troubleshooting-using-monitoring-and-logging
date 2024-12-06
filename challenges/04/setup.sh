@@ -9,9 +9,6 @@ INITIAL_ADMIN_PASSWORD=$(sudo cat /var/lib/jenkins/secrets/initialAdminPassword)
 # Download the Jenkins CLI jar
 curl -O http://localhost:8080/jnlpJars/jenkins-cli.jar
 
-# Install prometheus
-java -jar jenkins-cli.jar -s http://localhost:8080/ -auth admin:$INITIAL_ADMIN_PASSWORD install-plugin prometheus.hpi
-
 # Create a Groovy script to create the admin user
 cat << EOF > create_admin_user.groovy
 import jenkins.model.*
