@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "Updating JAVA_ARGS"
-sed -i 's/-Djava.awt.headless=true/-Djenkins.install.runSetupWizard=false -Dhttp.auth.preference=basic -Djdk.http.auth.tunnelin.disabledSchemes= -Djava.awt.headless=true/' /lib/systemd/system/jenkins.service
+sed -i 's/-Djava.awt.headless=true/-Dhttp.auth.preference=basic -Djdk.http.auth.tunnelin.disabledSchemes= -Djava.awt.headless=true/' /lib/systemd/system/jenkins.service
 
 echo "Reloading Jenkins to apply changes"
 systemctl daemon-reload
