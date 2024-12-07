@@ -3,7 +3,7 @@ def installed = false
 def initialized = false
 def fileSeperator=File.separator;
 
-def pluginslist = ['prometheus']
+def pluginslist = ['prometheus', 'blueocean']
 def instance = Jenkins.getInstance()
 def pm = instance.getPluginManager()
 def uc = instance.getUpdateCenter()
