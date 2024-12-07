@@ -1,0 +1,42 @@
+pipeline {
+    agent any
+    environment {
+        GO_APP_NAME = 'my-metrics-app'
+    }
+    stages {
+        stage('Build') {
+            steps {
+                script {
+                    // Build the Go application
+                    sh 'go build -o $GO_APP_NAME /home/pslearner/challenges/05/my-metrics-app/main.go'
+                }
+            }
+        }
+        stage('Deploy') {
+            steps {
+                script {
+                    // Deploy the application on localhost
+                    sh './$GO_APP_NAME &'
+                }
+            }
+        }
+        stage('Update Prometheus') {
+            steps {
+                script {
+                    // Update Prometheus configuration
+                    sh '''
+                    echo "Updating Prometheus configuration"
+                    cat <<EOF >> /etc/prometheus/prometheus.yml
+                    - job_name: 'my-metrics-app'
+                      scrape_interval: 5s
+                      static_configs:
+                      - targets: ['localhost:2112']
+                    EOF
+                    '''
+                    // Reload Prometheus
+                    sh 'kill -HUP $(pgrep prometheus)'
+                }
+            }
+        }
+    }
+}
