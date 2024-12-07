@@ -15,12 +15,8 @@ def plugins = [
     'credentials',         // Credentials
     'job-dsl',             // Job DSL
     'matrix-auth',         // Matrix Authorization Strategy
-    'ldap',                // LDAP
-    'email-ext',           // Email Extension
-    'mailer',              // Mailer
     'cloudbees-folder',    // Folders
 	'prometheus',          // Prometheus metrics plugin
-	'support-core',        // Support Core for enhanced login
 ]
 
 plugins.each {

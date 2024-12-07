@@ -1,10 +1,7 @@
 #!/bin/bash
 
-# Wait for Jenkins to fully start
-sleep 60
-
 # Update JAVA_ARGS
-sed -i 's/-Djava.awt.headless=true/-Dhttp.auth.preference=basic -Djdk.http.auth.tunnelin.disabledSchemes= -Djava.awt.headless=true/' /lib/systemtd/system/jenkins.service
+sed -i 's/-Djava.awt.headless=true/-Djenkins.install.runSetupWizard=false -Dhttp.auth.preference=basic -Djdk.http.auth.tunnelin.disabledSchemes= -Djava.awt.headless=true/' /lib/systemd/system/jenkins.service
 
 # Reload to apply changes
 systemctl daemon-reload
@@ -33,8 +30,13 @@ sed -i "s/'noProxy'/\"$noProxy\"/" /home/pslearner/challenges/04/setup/setup_pro
 # Setup proxy
 java -jar jenkins-cli.jar -s http://localhost:8080/ -auth admin:$INITIAL_ADMIN_PASSWORD groovy = < /home/pslearner/challenges/04/setup/setup_proxy.groovy
 
+# Disable wizard
+java -jar jenkins-cli.jar -s http://localhost:8080/ -auth admin:$INITIAL_ADMIN_PASSWORD groovy = < /home/pslearner/challenges/04/setup/disable_wizard.groovy
+
 # Install plugins
-java -jar jenkins-cli.jar -s http://localhost:8080/ -auth admin:$INITIAL_ADMIN_PASSWORD groovy = < /home/pslearner/challenges/04/setup/install_plugins.groovy
+# java -jar jenkins-cli.jar -s http://localhost:8080/ -auth admin:$INITIAL_ADMIN_PASSWORD groovy = < /home/pslearner/challenges/04/setup/install_plugins.groovy
+https_proxy="$https_proxy" java -jar jenkins-cli.jar -s http://localhost:8080/ -auth admin:$INITIAL_ADMIN_PASSWORD install-plugin https://updates.jenkins.io/download/plugins/prometheus/795.v995762102f28/prometheus.hpi
+
 
 # Run the Groovy script to create the admin user
 java -jar jenkins-cli.jar -s http://localhost:8080/ -auth admin:$INITIAL_ADMIN_PASSWORD groovy = < /home/pslearner/challenges/04/setup/create_admin_user.groovy
