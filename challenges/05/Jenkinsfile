@@ -11,7 +11,7 @@ pipeline {
 				echo 'Building the Go application...'
 				dir (env.APP_DIRECTORY) {
 					// Build the Go application
-					sh 'go build -mod=readonly -o $GO_APP_NAME main.go'
+					sh 'sudo go build -mod=readonly -o $GO_APP_NAME main.go'
                 }
             }
         }
@@ -27,20 +27,36 @@ pipeline {
 				sh 'sudo systemctl enable my-metrics-app'
             }
         }
-        stage('Update Prometheus') {
-            steps {
-				echo 'Creating new Prometheus job details...'
-				sh '''
-				echo "  - job_name: 'my-metrics-app'" > new_job.yml
-				echo "    scrape_interval: 5s" >> new_job.yml
-				echo "    static_configs:" >> new_job.yml
-				echo "    - targets: ['localhost:2112']" >> new_job.yml
-				'''
-				echo 'Submitting new job to Prometheus...'
-				sh 'curl -X POST http://localhost:9090/api/v1/config -d @new_job.yml'
-				echo 'Reloading Prometheus...'
-				sh 'curl -X POST http://localhost:9090/-/reload'
+        stage('Setup Monitoring & Logging') {
+            parallel {
+				stage('Setup Prometheus scraping') {
+					steps {
+						echo 'Creating new Prometheus job details...'
+						sh '''
+						echo "  - job_name: 'my-metrics-app'" > new_job.yml
+						echo "    scrape_interval: 5s" >> new_job.yml
+						echo "    static_configs:" >> new_job.yml
+						echo "    - targets: ['localhost:2112']" >> new_job.yml
+						'''
+						echo 'Submitting new job to Prometheus...'
+						sh 'curl -X POST http://localhost:9090/api/v1/config -d @new_job.yml'
+						echo 'Reloading Prometheus...'
+						sh 'curl -X POST http://localhost:9090/-/reload'
+					}
+				}
+				stage('Ingest logs to ElasticSearch') {
+					steps {
+						echo 'Updating logstash config...'
+						dir (env.APP_DIRECTORY) {
+							sh 'sudo cp my-metrics-app.conf /etc/logstash/conf.d/.'
+						}
+						
+						echo 'Restarting logstash service...'
+						sh 'sudo systemctl restart logstash --no-pager -n 5'
+					}
+				}
             }
         }
     }
 }
+
