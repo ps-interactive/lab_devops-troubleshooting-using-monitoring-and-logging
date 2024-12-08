@@ -2,40 +2,48 @@ pipeline {
     agent any
     environment {
         GO_APP_NAME = 'my-metrics-app'
+        GOMODCACHE = '/home/jenkins/go-cache'
     }
     stages {
         stage('Build') {
             steps {
-                script {
-                    // Build the Go application
-                    sh 'go build -o $GO_APP_NAME /home/pslearner/challenges/05/my-metrics-app/main.go'
+				echo 'Building the Go application...'
+				dir ('/home/jenkins/my-metrics-app') {
+					// Build the Go application
+					sh 'go build -mod=readonly -o $GO_APP_NAME main.go'
                 }
             }
         }
         stage('Deploy') {
             steps {
-                script {
-                    // Deploy the application on localhost
-                    sh './$GO_APP_NAME &'
-                }
+				echo 'Creating service file...'
+				sh '''
+				echo "[Unit]" > /etc/systemd/system/my-metrics-app.service
+				echo "Description=My Go Application" >> /etc/systemd/system/my-metrics-app.service
+				echo "[Service]" >> /etc/systemd/system/my-metrics-app.service
+				echo "ExecStart=/home/jenkins/my-metrics-app/$GO_APP_NAME" >> /etc/systemd/system/my-metrics-app.service
+				echo "Restart=always" >> /etc/systemd/system/my-metrics-app.service
+				echo "[Install]" >> /etc/systemd/system/my-metrics-app.service
+				echo "WantedBy=multi-user.target" >> /etc/systemd/system/my-metrics-app.service
+				'''
+				echo 'Starting app...'
+				sh 'sudo systemctl start my-metrics-app'
+				sh 'sudo systemctl enable my-metrics-app'
             }
         }
         stage('Update Prometheus') {
             steps {
-                script {
-                    // Update Prometheus configuration
-                    sh '''
-                    echo "Updating Prometheus configuration"
-                    cat <<EOF >> /etc/prometheus/prometheus.yml
-                    - job_name: 'my-metrics-app'
-                      scrape_interval: 5s
-                      static_configs:
-                      - targets: ['localhost:2112']
-                    EOF
-                    '''
-                    // Reload Prometheus
-                    sh 'kill -HUP $(pgrep prometheus)'
-                }
+				echo 'Creating new Prometheus job details...'
+				sh '''
+				echo "  - job_name: 'my-metrics-app'" > new_job.yml
+				echo "    scrape_interval: 5s" >> new_job.yml
+				echo "    static_configs:" >> new_job.yml
+				echo "    - targets: ['localhost:2112']" >> new_job.yml
+				'''
+				echo 'Submitting new job to Prometheus...'
+				sh 'curl -X POST http://localhost:9090/api/v1/config -d @new_job.yml'
+				echo 'Reloading Prometheus...'
+				sh 'curl -X POST http://localhost:9090/-/reload'
             }
         }
     }
