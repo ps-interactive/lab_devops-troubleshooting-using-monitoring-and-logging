@@ -23863,7 +23863,7 @@
     ]
   },
   "time": {
-    "from": "now-24h",
+    "from": "now-1h",
     "to": "now"
   },
   "timepicker": {
@@ -23892,8 +23892,8 @@
     ]
   },
   "timezone": "browser",
-  "title": "Node Exporter Full",
-  "uid": "rYdddlPWk",
+  "title": "Node Exporter",
+  "uid": "node-exporter",
   "version": 92,
   "weekStart": ""
 }

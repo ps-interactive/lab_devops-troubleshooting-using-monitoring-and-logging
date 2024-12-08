@@ -1696,7 +1696,7 @@
     "list": []
   },
   "time": {
-    "from": "now-30m",
+    "from": "now-1h",
     "to": "now"
   },
   "timepicker": {
@@ -1726,6 +1726,6 @@
   },
   "timezone": "browser",
   "title": "Jenkins: Performance and Health Overview",
-  "uid": "haryan-jenkins",
+  "uid": "jenkins",
   "version": 1
 }
