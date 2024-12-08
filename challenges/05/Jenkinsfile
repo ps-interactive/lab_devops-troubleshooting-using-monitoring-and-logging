@@ -3,12 +3,13 @@ pipeline {
     environment {
         GO_APP_NAME = 'my-metrics-app'
         GOMODCACHE = '/home/jenkins/go-cache'
+		APP_DIRECTORY = '/home/jenkins/my-metrics-app'
     }
     stages {
         stage('Build') {
             steps {
 				echo 'Building the Go application...'
-				dir ('/home/jenkins/my-metrics-app') {
+				dir (env.APP_DIRECTORY) {
 					// Build the Go application
 					sh 'go build -mod=readonly -o $GO_APP_NAME main.go'
                 }
@@ -17,15 +18,10 @@ pipeline {
         stage('Deploy') {
             steps {
 				echo 'Creating service file...'
-				sh '''
-				echo "[Unit]" > /etc/systemd/system/my-metrics-app.service
-				echo "Description=My Go Application" >> /etc/systemd/system/my-metrics-app.service
-				echo "[Service]" >> /etc/systemd/system/my-metrics-app.service
-				echo "ExecStart=/home/jenkins/my-metrics-app/$GO_APP_NAME" >> /etc/systemd/system/my-metrics-app.service
-				echo "Restart=always" >> /etc/systemd/system/my-metrics-app.service
-				echo "[Install]" >> /etc/systemd/system/my-metrics-app.service
-				echo "WantedBy=multi-user.target" >> /etc/systemd/system/my-metrics-app.service
-				'''
+				dir (env.APP_DIRECTORY) {
+					sh 'sudo cp my-metrics-app.service /etc/systemd/system/.'
+				}
+				
 				echo 'Starting app...'
 				sh 'sudo systemctl start my-metrics-app'
 				sh 'sudo systemctl enable my-metrics-app'

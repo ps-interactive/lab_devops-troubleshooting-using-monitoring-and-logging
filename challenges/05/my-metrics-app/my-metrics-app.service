@@ -1,0 +1,9 @@
+[Unit]
+Description=My Go Application
+
+[Service]
+ExecStart=/home/jenkins/my-metrics-app/$GO_APP_NAME
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
