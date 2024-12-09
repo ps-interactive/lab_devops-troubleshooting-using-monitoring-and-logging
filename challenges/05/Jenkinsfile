@@ -12,6 +12,7 @@ pipeline {
 				dir (env.APP_DIRECTORY) {
 					// Build the Go application
 					sh 'sudo go build -mod=readonly -o $GO_APP_NAME main.go'
+					sh 'sudo chmod 777 $GO_APP_NAME'
                 }
             }
         }
@@ -23,6 +24,7 @@ pipeline {
 				}
 				
 				echo 'Starting app...'
+				sh 'sudo systemctl daemon-reload'
 				sh 'sudo systemctl start my-metrics-app'
 				sh 'sudo systemctl enable my-metrics-app'
             }
@@ -33,15 +35,20 @@ pipeline {
 					steps {
 						echo 'Creating new Prometheus job details...'
 						sh '''
-						echo "  - job_name: 'my-metrics-app'" > new_job.yml
-						echo "    scrape_interval: 5s" >> new_job.yml
-						echo "    static_configs:" >> new_job.yml
-						echo "    - targets: ['localhost:2112']" >> new_job.yml
+						config_file="/etc/p/prometheus/prometheus.yml"
+						new_job_name="my-metrics-app"
+						if grep -q "job_name: $new_job_name" "$config_file"; then
+							echo "Scrape configuration for job '$new_job_name' already exists."
+						else
+							echo "  - job_name: 'my-metrics-app'" >> $config_file
+							echo "    scrape_interval: 5s" >> $config_file
+							echo "    static_configs:" >> $config_file
+							echo "    - targets: ['localhost:2112']" >> $config_file
+							echo "Reloading Prometheus..."
+							curl -X POST http://localhost:9090/-/reload
+							echo "Configuration reloaded. New scrape config added successfully."
+						fi
 						'''
-						echo 'Submitting new job to Prometheus...'
-						sh 'curl -X POST http://localhost:9090/api/v1/config -d @new_job.yml'
-						echo 'Reloading Prometheus...'
-						sh 'curl -X POST http://localhost:9090/-/reload'
 					}
 				}
 				stage('Ingest logs to ElasticSearch') {
@@ -53,6 +60,10 @@ pipeline {
 						
 						echo 'Restarting logstash service...'
 						sh 'sudo systemctl restart logstash --no-pager -n 5'
+						echo 'Creating kibana index pattern...'
+						sh '''
+						curl -X POST http://localhost:5601/api/index_patterns/index_pattern -H "Content-Type: application/json" -H "kbn-xsrf: true" -d '{"index_pattern": {"title": "my-metrics-app*", "timeFieldName": "@timestamp"}}'
+						'''
 					}
 				}
             }
