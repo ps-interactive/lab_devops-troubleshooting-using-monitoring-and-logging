@@ -1,8 +1,8 @@
 pipeline {
     agent any
     environment {
-        GO_APP_NAME = 'my-metrics-app'
-        GOMODCACHE = '/home/jenkins/go-cache'
+	    GO_APP_NAME = 'my-metrics-app'
+		GOMODCACHE = '/home/jenkins/go-cache'
 		APP_DIRECTORY = '/home/jenkins/my-metrics-app'
     }
     stages {
@@ -35,7 +35,7 @@ pipeline {
 					steps {
 						echo 'Creating new Prometheus job details...'
 						sh '''
-						config_file="/etc/p/prometheus/prometheus.yml"
+						config_file="/etc/prometheus/prometheus.yml"
 						new_job_name="my-metrics-app"
 						if grep -q "job_name: $new_job_name" "$config_file"; then
 							echo "Scrape configuration for job '$new_job_name' already exists."
