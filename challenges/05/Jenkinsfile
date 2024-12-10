@@ -1,9 +1,9 @@
 pipeline {
     agent any
     environment {
-	    GO_APP_NAME = 'my-metrics-app'
-		GOMODCACHE = '/home/jenkins/go-cache'
-		APP_DIRECTORY = '/home/jenkins/my-metrics-app'
+        GO_APP_NAME = 'my-metrics-app'
+        GOMODCACHE = '/home/jenkins/go-cache'
+        APP_DIRECTORY = '/home/jenkins/my-metrics-app'
     }
     stages {
         stage('Build') {
