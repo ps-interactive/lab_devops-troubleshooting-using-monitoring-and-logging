@@ -3,7 +3,7 @@ set -e
 
 JENKINS_URL="http://localhost:8080"
 JENKINS_CONTAINER="jenkins-docker"
-JENKINS_HOME_HOST="/home/pslearner/jenkins-lab"
+JENKINS_HOME_HOST="/home/pslearner/jenkins"
 SETUP_DIR="/home/pslearner/challenges/04/setup"
 CLI_JAR="/tmp/jenkins-cli.jar"
 
