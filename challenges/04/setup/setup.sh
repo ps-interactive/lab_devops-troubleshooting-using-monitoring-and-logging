@@ -42,12 +42,9 @@ echo "Run Jenkins setup scripts"
 # java -jar "$CLI_JAR" -s "$JENKINS_URL/" -auth admin:$INITIAL_ADMIN_PASSWORD groovy = < "$SETUP_DIR/jenkins_setup_proxy.groovy"
 
 java -jar "$CLI_JAR" -s "$JENKINS_URL/" -auth admin:$INITIAL_ADMIN_PASSWORD groovy = < "$SETUP_DIR/jenkins_disable_wizard.groovy"
-
-java -jar "$CLI_JAR" -s "$JENKINS_URL/" -auth admin:$INITIAL_ADMIN_PASSWORD groovy = < "$SETUP_DIR/jenkins_install_plugins.groovy"
-
 java -jar "$CLI_JAR" -s "$JENKINS_URL/" -auth admin:$INITIAL_ADMIN_PASSWORD groovy = < "$SETUP_DIR/jenkins_create_admin_user.groovy"
-
-java -jar "$CLI_JAR" -s "$JENKINS_URL/" -auth admin:$INITIAL_ADMIN_PASSWORD groovy = < "$SETUP_DIR/jenkins_remove_proxy.groovy"
+java -jar "$CLI_JAR" -s "$JENKINS_URL/" -auth admin:$INITIAL_ADMIN_PASSWORD groovy = < "$SETUP_DIR/jenkins_install_plugins.groovy"
+# java -jar "$CLI_JAR" -s "$JENKINS_URL/" -auth admin:$INITIAL_ADMIN_PASSWORD groovy = < "$SETUP_DIR/jenkins_remove_proxy.groovy"
 
 echo "Restart Jenkins container"
 sudo docker restart "$JENKINS_CONTAINER"
