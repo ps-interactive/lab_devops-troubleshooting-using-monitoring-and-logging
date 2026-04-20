@@ -39,7 +39,7 @@ sed -i "s/'proxyPassword'/\"$proxyPassword\"/" "$SETUP_DIR/jenkins_setup_proxy.g
 sed -i "s/'noProxy'/\"$noProxy\"/" "$SETUP_DIR/jenkins_setup_proxy.groovy"
 
 echo "Run Jenkins setup scripts"
-java -jar "$CLI_JAR" -s "$JENKINS_URL/" -auth admin:$INITIAL_ADMIN_PASSWORD groovy = < "$SETUP_DIR/jenkins_setup_proxy.groovy"
+# java -jar "$CLI_JAR" -s "$JENKINS_URL/" -auth admin:$INITIAL_ADMIN_PASSWORD groovy = < "$SETUP_DIR/jenkins_setup_proxy.groovy"
 
 java -jar "$CLI_JAR" -s "$JENKINS_URL/" -auth admin:$INITIAL_ADMIN_PASSWORD groovy = < "$SETUP_DIR/jenkins_disable_wizard.groovy"
 
