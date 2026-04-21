@@ -1,3 +1,4 @@
+cat << 'EOF' > /home/pslearner/challenges/04/setup/setup.sh
 #!/bin/bash
 set -e
 
@@ -7,7 +8,7 @@ JENKINS_HOME_HOST="/home/pslearner/jenkins"
 SETUP_DIR="/home/pslearner/challenges/04/setup"
 CLI_JAR="/tmp/jenkins-cli.jar"
 
-# 1. Clean Groovy files (Removes shebangs that cause compilation errors)
+# Clean problematic shebangs from Groovy files
 sed -i '/^#!/d' "$SETUP_DIR"/*.groovy
 
 echo "Wait for Jenkins to be ready"
@@ -25,7 +26,6 @@ echo "Download Jenkins CLI"
 curl -fsSL -o "$CLI_JAR" "$JENKINS_URL/jnlpJars/jenkins-cli.jar"
 
 echo "Extract proxy values"
-# Using comma as delimiter for extraction to avoid slash issues
 proxyAddress=$(echo "$https_proxy" | sed -r 's|https?://([^:]+):([^@]+)@([^:]+):([0-9]+)|\3|')
 proxyPort=$(echo "$https_proxy" | sed -r 's|https?://([^:]+):([^@]+)@([^:]+):([0-9]+)|\4|')
 proxyUser=$(echo "$https_proxy" | sed -r 's|https?://([^:]+):([^@]+)@([^:]+):([0-9]+)|\1|')
@@ -33,23 +33,32 @@ proxyPassword=$(echo "$https_proxy" | sed -r 's|https?://([^:]+):([^@]+)@([^:]+)
 noProxy='localhost|127.0.0.1|::1'
 
 echo "Update proxy groovy script"
-# FIX: Use ":" as delimiter and target double quotes to match the Groovy file
-sed -i "s:\"proxyAddress\":\"$proxyAddress\":" "$SETUP_DIR/jenkins_setup_proxy.groovy"
-sed -i "s:proxyPort:$proxyPort:" "$SETUP_DIR/jenkins_setup_proxy.groovy"
-sed -i "s:\"proxyUser\":\"$proxyUser\":" "$SETUP_DIR/jenkins_setup_proxy.groovy"
-sed -i "s:\"proxyPassword\":\"$proxyPassword\":" "$SETUP_DIR/jenkins_setup_proxy.groovy"
-sed -i "s:\"noProxy\":\"$noProxy\":" "$SETUP_DIR/jenkins_setup_proxy.groovy"
+sed -i "s|\"proxyAddress\"|\"$proxyAddress\"|" "$SETUP_DIR/jenkins_setup_proxy.groovy"
+sed -i "s|proxyPort|$proxyPort|" "$SETUP_DIR/jenkins_setup_proxy.groovy"
+sed -i "s|\"proxyUser\"|\"$proxyUser\"|" "$SETUP_DIR/jenkins_setup_proxy.groovy"
+sed -i "s|\"proxyPassword\"|\"$proxyPassword\"|" "$SETUP_DIR/jenkins_setup_proxy.groovy"
+sed -i "s|\"noProxy\"|\"$noProxy\"|" "$SETUP_DIR/jenkins_setup_proxy.groovy"
 
 echo "Run Jenkins setup scripts"
-# Run proxy setup first so Jenkins can resolve plugin downloads/updates
+# 1. Setup Proxy (Crucial for plugin downloads)
 java -jar "$CLI_JAR" -s "$JENKINS_URL/" -auth admin:$INITIAL_ADMIN_PASSWORD groovy = < "$SETUP_DIR/jenkins_setup_proxy.groovy"
+
+# 2. Disable Wizard
 java -jar "$CLI_JAR" -s "$JENKINS_URL/" -auth admin:$INITIAL_ADMIN_PASSWORD groovy = < "$SETUP_DIR/jenkins_disable_wizard.groovy"
+
+# 3. Install Plugins (Prometheus, Blue Ocean, Pipeline)
+java -jar "$CLI_JAR" -s "$JENKINS_URL/" -auth admin:$INITIAL_ADMIN_PASSWORD groovy = < "$SETUP_DIR/jenkins_install_plugins.groovy"
+
+# 4. Create Admin User
 java -jar "$CLI_JAR" -s "$JENKINS_URL/" -auth admin:$INITIAL_ADMIN_PASSWORD groovy = < "$SETUP_DIR/jenkins_create_admin_user.groovy"
 
-echo "Restart Jenkins container"
+echo "Restart Jenkins container to activate plugins"
 sudo docker restart "$JENKINS_CONTAINER"
 
 echo "Jenkins setup complete"
+EOF
+
+chmod +x /home/pslearner/challenges/04/setup/setup.sh
 
 
 # #!/bin/bash
