@@ -9,7 +9,7 @@
 // instance.save()
 
 
-#!groovy
+// #!groovy
 
 import jenkins.model.*
 import hudson.util.*;
