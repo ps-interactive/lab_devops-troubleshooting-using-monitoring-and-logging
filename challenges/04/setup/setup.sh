@@ -33,11 +33,17 @@ proxyPassword=$(echo "$https_proxy" | sed -r 's|https?://([^:]+):([^@]+)@([^:]+)
 noProxy='localhost|127.0.0.1|::1'
 
 echo "Update proxy groovy script"
-sed -i "s|\"proxyAddress\"|\"$proxyAddress\"|" "$SETUP_DIR/jenkins_setup_proxy.groovy"
-sed -i "s|proxyPort|$proxyPort|" "$SETUP_DIR/jenkins_setup_proxy.groovy"
-sed -i "s|\"proxyUser\"|\"$proxyUser\"|" "$SETUP_DIR/jenkins_setup_proxy.groovy"
-sed -i "s|\"proxyPassword\"|\"$proxyPassword\"|" "$SETUP_DIR/jenkins_setup_proxy.groovy"
-sed -i "s|\"noProxy\"|\"$noProxy\"|" "$SETUP_DIR/jenkins_setup_proxy.groovy"
+# sed -i "s|\"proxyAddress\"|\"$proxyAddress\"|" "$SETUP_DIR/jenkins_setup_proxy.groovy"
+# sed -i "s|proxyPort|$proxyPort|" "$SETUP_DIR/jenkins_setup_proxy.groovy"
+# sed -i "s|\"proxyUser\"|\"$proxyUser\"|" "$SETUP_DIR/jenkins_setup_proxy.groovy"
+# sed -i "s|\"proxyPassword\"|\"$proxyPassword\"|" "$SETUP_DIR/jenkins_setup_proxy.groovy"
+# sed -i "s|\"noProxy\"|\"$noProxy\"|" "$SETUP_DIR/jenkins_setup_proxy.groovy"
+
+sed -i "s#\"proxyAddress\"#\"$proxyAddress\"#" "$SETUP_DIR/jenkins_setup_proxy.groovy"
+sed -i "s#proxyPort#$proxyPort#" "$SETUP_DIR/jenkins_setup_proxy.groovy"
+sed -i "s#\"proxyUser\"#\"$proxyUser\"#" "$SETUP_DIR/jenkins_setup_proxy.groovy"
+sed -i "s#\"proxyPassword\"#\"$proxyPassword\"#" "$SETUP_DIR/jenkins_setup_proxy.groovy"
+sed -i "s#\"noProxy\"#\"$noProxy\"#" "$SETUP_DIR/jenkins_setup_proxy.groovy"
 
 echo "Run Jenkins setup scripts"
 # 1. Setup Proxy (Crucial for plugin downloads)
