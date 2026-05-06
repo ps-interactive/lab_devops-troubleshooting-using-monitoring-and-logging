@@ -1,4 +1,3 @@
-cat << 'EOF' > /home/pslearner/challenges/04/setup/setup.sh
 #!/bin/bash
 set -e
 
@@ -16,7 +15,7 @@ for i in {1..60}; do
   if sudo test -f "$JENKINS_HOME_HOST/secrets/initialAdminPassword" && \
      curl -fs "$JENKINS_URL/login" >/dev/null 2>&1; then
     echo "Jenkins is responding; allowing extra time for CLI subsystem..."
-    sleep 15
+    sleep 20
     break
   fi
   sleep 5
@@ -52,9 +51,6 @@ echo "Restart Jenkins container to activate plugins"
 sudo docker restart "$JENKINS_CONTAINER"
 
 echo "Jenkins setup complete"
-EOF
-
-chmod +x /home/pslearner/challenges/04/setup/setup.sh
 #previous edits
 # cat << 'EOF' > /home/pslearner/challenges/04/setup/setup.sh
 # #!/bin/bash
